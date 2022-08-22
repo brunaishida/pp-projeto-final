@@ -1,46 +1,97 @@
 module Main where
 import System.Random
+import Data.List
 
 iniciarPinos :: [String]
 iniciarPinos = ["0" | x <- [0..9], True]
 
-intToString :: Integer -> String
-intToString n = show n
+integerToString :: Integer -> String
+integerToString n = show n
 
--- gerarNumeroRandom :: IO
--- gerarNumeroRandom = randomR (0, 1 :: Integer)
+integerToInt :: Integer -> Int
+integerToInt n = fromInteger n
 
--- replace pos newVal list = take pos list ++ newVal : drop (pos+1) list
+pinoFoiDerrubado :: String -> Bool
+pinoFoiDerrubado valor = valor == "X"
 
--- derrubarPino :: IO Integer -> [String] -> [String]
--- derrubarPino _ [] = []
--- derrubarPino n (p:ps) = do
---   number <- n
---   return $ splitAt i-1 list in ys ++ "X" ++ tail zs
+derrubarPino :: Integer -> [String] -> [String]
+derrubarPino posicaoPino pinos = take (integerToInt posicaoPino) pinos ++ "X" : drop ((integerToInt posicaoPino)+1) pinos
 
+resultadoJogada :: Integer -> [String] -> IO [String]
+resultadoJogada pinosParaDerrubar pinos = do
+  if (pinosParaDerrubar <= 0) then do
+    -- print pinos
+    return pinos
+  else do
+    -- print pinos
+    pinoParaDerrubar <- getStdRandom $ randomR (0, 9 :: Integer)
+    -- putStrLn("Pino Derrubado!")
+    -- print pinoParaDerrubar
+    resultadoJogada (pinosParaDerrubar-1) (derrubarPino pinoParaDerrubar pinos)
 
--- resultadoJogada :: IO Integer -> [String] -> IO()
--- resultadoJogada n pinos = do
---   if (n <= 0) then do
---     print pinos
---   else do
---     resultadoJogada (n-1) (derrubarPino gerarNumeroRandom pinos)
+filtraPinosNovosDerrubados :: [String] -> [String] -> [String]
+filtraPinosNovosDerrubados posAterior posNova = filter pinoFoiDerrubado (posNova \\ posAterior)
 
--- gerarJogada :: Integer
--- gerarJogada = randomRIO (1, 10)
+calculaPontos :: [String] -> Int
+calculaPontos novosPinosDerrubados = length novosPinosDerrubados
 
-comecarJogo :: [String] -> Integer -> IO ()
-comecarJogo pinos rodada = do
+calculaPontuacao :: [String] -> [String] -> Int
+calculaPontuacao pinosPosicaoAnterior pinosNovaPosicao = (calculaPontos (filtraPinosNovosDerrubados pinosPosicaoAnterior pinosNovaPosicao))
+
+iniciarLance :: [String] -> Int -> Integer -> IO (Int, Int)
+iniciarLance pinos pontuacao nLance = do
+  if (nLance == 1) then do
+    pinosParaDerrubar <- getStdRandom $ randomR (0, 9 :: Integer)
+    print pinosParaDerrubar
+    resultadoPinos <- (resultadoJogada pinosParaDerrubar pinos)
+    -- print (filtraPinosNovosDerrubados pinos resultadoPinos)
+    -- putStrLn("Pontuacao!")
+    -- print (calculaPontuacao pinos resultadoPinos)
+    return (pontuacao, (calculaPontuacao pinos resultadoPinos))
+  else do
+      pinosParaDerrubar <- getStdRandom $ randomR (0, 9 :: Integer)
+      print pinosParaDerrubar
+      if (pinosParaDerrubar == 9) then do return (10,0) -- saberemos que é um Strike
+      else do
+        resultadoPinos <- (resultadoJogada pinosParaDerrubar pinos)
+        -- print (filtraPinosNovosDerrubados pinos resultadoPinos)
+        -- putStrLn("Pontuacao!")
+        -- print (calculaPontuacao pontuacao pinos resultadoPinos)
+        iniciarLance resultadoPinos (calculaPontuacao pinos resultadoPinos) (nLance+1)
+
+somaPontosLance :: (Int, Int) -> Int
+somaPontosLance tuplePontuacao = (fst tuplePontuacao) + (snd tuplePontuacao)
+
+-- bonusCasoStrikeSomaDePontos :: Integer -> Integer -> Int
+-- bonusCasoStrikeSomaDePontos strikesSeguidos sparesSeguidos = do
+--     if (strikesSeguidos > 0) then return (integerToInt strikesSeguidos) * 10
+--     else
+--       if (sparesSeguidos > 0) then return (integerToInt sparesSeguidos) * 10
+--       else return 0
+--     return 0
+
+-- somarPontosStrikeSpare :: Integer -> Integer -> Int -> Int
+-- somarPontosStrikeSpare strikesSeguidos sparesSeguidos pontuacaoLance = 
+--   if (strikesSeguidos > 0) then return (pontuacaoLance)
+
+comecarJogo :: Integer -> Int -> Integer -> Integer -> IO ()
+comecarJogo rodada pontuacao strikesSeguidos sparesSeguidos = do
   if (rodada > 10) then do
     putStrLn("Fim de jogo!")
   else do
-    putStrLn("Essa é a rodada " ++ (intToString rodada))
+    putStrLn("Essa é a rodada " ++ (integerToString rodada))
     putStrLn("Digite algo para começar!")
     jogada <- getLine
-    result <- getStdRandom $ randomR (0, 10 :: Integer)
-    if (result >= 5) then print "aaaa" else print "sadasd"
-    print result
-    comecarJogo pinos (rodada+1)
+    putStrLn("Pontuacao antes da jogada")
+    print pontuacao
+    pontuacaoLance <- (iniciarLance iniciarPinos 0 0)
+    if ((fst pontuacaoLance) == 10) then comecarJogo (rodada+1) (pontuacao+10) (strikesSeguidos+1) 0
+    else 
+      if ((somaPontosLance pontuacaoLance) == 10) then comecarJogo (rodada+1) (pontuacao+10) 0 (sparesSeguidos+1)
+      else comecarJogo (rodada+1) (pontuacao+(somaPontosLance pontuacaoLance)) 0 0
+
+-- falta adicionar bonus por strike/spare
+
 
 main :: IO ()
 main = do
@@ -49,8 +100,6 @@ main = do
   nome <- getLine
   putStrLn ("Olá " ++ nome ++ ", vamos começar!")
   putStrLn "Iniciando o jogo..."
-  putStrLn "Seus pinos: "
-  print iniciarPinos
-  comecarJogo iniciarPinos 1
+  comecarJogo 1 0 0 0
 
 
