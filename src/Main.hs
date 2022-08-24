@@ -46,8 +46,8 @@ calculaPontuacaoStrike :: [(Int,Int)] -> Int -> Integer -> Integer -> Int
 calculaPontuacaoStrike pontuacoesPendente pontuacao posicao 0 = pontuacao+10
 calculaPontuacaoStrike pontuacoesPendente pontuacao posicao 1 = 
   if (pontuacaoPendentePreenchida (pontuacoesPendente!!((integerToInt posicao)+2))) then
-    if (validaResultadoRodada (pontuacoesPendente!!((integerToInt posicao)+1)) == "Strike") then
-      calculaPontuacaoStrike pontuacoesPendente (pontuacao+10) posicao 1
+    if (validaResultadoRodada (pontuacoesPendente!!((integerToInt posicao)+2)) == "Strike") then
+      calculaPontuacaoStrike pontuacoesPendente (pontuacao+10) posicao 0
     else calculaPontuacaoStrike pontuacoesPendente (pontuacao + fst (pontuacoesPendente!!((integerToInt posicao)+1))) posicao 0
   else 0
 calculaPontuacaoStrike pontuacoesPendente pontuacao posicao 2 =
