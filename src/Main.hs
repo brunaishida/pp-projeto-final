@@ -179,5 +179,12 @@ main = do
   putStrLn ("Olá " ++ nome ++ ", vamos começar!")
   putStrLn "Iniciando o jogo..."
   comecarJogo 0 iniciarPontuacao iniciarPontosPendentes
-
+  -- inicio da parte grafica do gloss
+  -- play
+  --   janela
+  --   black
+  --   10
+  --   informaRodada
+  --   where
+  --     janela = InWindow "Boliche Arcade" (820, 580) (50, 50)
 
