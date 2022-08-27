@@ -1,6 +1,10 @@
 module Main where
 import System.Random
 import Data.List
+import Desenho
+import Database
+import Graphics.Gloss
+import Graphics.Gloss.Interface.Pure.Game
 
 integerToString :: Integer -> String
 integerToString n = show n
@@ -11,8 +15,14 @@ integerToInt n = fromInteger n
 iniciarPinos :: [String]
 iniciarPinos = ["0" | x <- [0..9], True]
 
+iniciarPontosCadaRodada :: [(Int, Int)]
+iniciarPontosCadaRodada = [(-1,-1) | x <- [0..11], True]
+
+adicionarPontoDaRodada :: [(Int, Int)] -> (Int, Int) -> Integer -> [(Int, Int)]
+adicionarPontoDaRodada pontosDaRodada novoPonto posicao = take (integerToInt posicao) pontosDaRodada ++ novoPonto : drop ((integerToInt posicao)+1) pontosDaRodada
+
 iniciarPontuacao :: [Int]
-iniciarPontuacao = [0 | x <- [0..11], True]
+iniciarPontuacao = [0 | x <- [0..9], True]
 
 somaTotalPotuacao :: [Int] -> Int
 somaTotalPotuacao [] = 0
@@ -35,6 +45,10 @@ pontuacaoPendentePreenchida pontuacaoPendente = (fst pontuacaoPendente) > -1
 
 somaPontosLance :: (Int, Int) -> Int
 somaPontosLance tuplePontuacao = (fst tuplePontuacao) + (snd tuplePontuacao)
+
+imprimeScore :: [(Int,Int)] -> [Int] -> IO()
+imprimeScore pontosCadaRodada pontuacao = do
+  putStrLn("scores")
 
 validaResultadoRodada :: (Int,Int) -> String
 validaResultadoRodada resultado = if (fst resultado == 10) then "Strike"
@@ -65,7 +79,32 @@ calculaPontuacaoSpare pontuacoesPendente pontuacao posicao 1 =
   else 0
 
 calcularNovaPontuacao :: [Int] -> [(Int,Int)] -> Integer -> ([Int], [(Int,Int)])
-calcularNovaPontuacao pontuacao pontuacoesPendente 12 = (pontuacao, pontuacoesPendente)
+calcularNovaPontuacao pontuacao pontuacoesPendente 9 = do
+  if ((fst(pontuacoesPendente!!11)) > -1) then 
+    (
+      adicionarPontuacao pontuacao (
+        (somaPontosLance (pontuacoesPendente!!9)) + (somaPontosLance (pontuacoesPendente!!10)) + (somaPontosLance (pontuacoesPendente!!11))
+      ) 9, 
+      (zerarPontoPendente (zerarPontoPendente (zerarPontoPendente pontuacoesPendente 9) 10) 11)
+    )
+  else 
+    if ((fst(pontuacoesPendente!!10)) > -1) then 
+      (
+        adicionarPontuacao pontuacao (
+          (somaPontosLance (pontuacoesPendente!!9)) + (somaPontosLance (pontuacoesPendente!!10))
+        ) 9, 
+        (zerarPontoPendente (zerarPontoPendente pontuacoesPendente 9) 10)
+      )
+    else 
+      if ((fst(pontuacoesPendente!!9)) > -1) then 
+      (
+        adicionarPontuacao pontuacao (
+          (somaPontosLance (pontuacoesPendente!!9))
+        ) 9, 
+        (zerarPontoPendente pontuacoesPendente 9)
+      )
+      else
+        (pontuacao, pontuacoesPendente)
 calcularNovaPontuacao pontuacao pontuacoesPendente posicao = do
   if (pontuacaoPendentePreenchida (pontuacoesPendente!!(integerToInt posicao))) then
     if (validaResultadoRodada (pontuacoesPendente!!(integerToInt posicao)) == "Strike") then
@@ -136,21 +175,35 @@ iniciarLance pinos pontuacao nLance = do
         -- print (calculaPontuacao pinos resultadoPinos)
         iniciarLance resultadoPinos (calculaPontuacao pinos resultadoPinos) (nLance+1)
 
--- bonusCasoStrikeSomaDePontos :: Integer -> Integer -> Int
--- bonusCasoStrikeSomaDePontos strikesSeguidos sparesSeguidos = do
---     if (strikesSeguidos > 0) then return (integerToInt strikesSeguidos) * 10
---     else
---       if (sparesSeguidos > 0) then return (integerToInt sparesSeguidos) * 10
---       else return 0
---     return 0
+casoRodada10 :: [(Int, Int)] -> Integer -> IO [(Int, Int)] 
+casoRodada10 pontosPendentes 0 = do
+  putStrLn("Rodada 0")
+  print pontosPendentes
+  pontuacaoLance <- (iniciarLance iniciarPinos 0 0)
+  return (adicionarPontoPendente pontosPendentes ((fst pontuacaoLance),0) 11)
+casoRodada10 pontosPendentes 1 = do 
+  putStrLn("Rodada 1")
+  print pontosPendentes
+  pontuacaoLance <- (iniciarLance iniciarPinos 0 0)
+  if (somaPontosLance pontuacaoLance == 10) then 
+     casoRodada10 (adicionarPontoPendente pontosPendentes (10,0) 10) 0
+  else
+      return (adicionarPontoPendente pontosPendentes pontuacaoLance 10)
+casoRodada10 pontosPendentes 2 = do
+  putStrLn("Rodada 2")
+  print pontosPendentes
+  pontuacaoLance <- (iniciarLance iniciarPinos 0 0)
+  if (fst pontuacaoLance == 10) then 
+    casoRodada10 (adicionarPontoPendente pontosPendentes (10,0) 9) 1
+  else
+    if (somaPontosLance pontuacaoLance == 10) then
+      casoRodada10 (adicionarPontoPendente pontosPendentes pontuacaoLance 9) 0
+    else
+      return (adicionarPontoPendente pontosPendentes pontuacaoLance 9)
 
--- somarPontosStrikeSpare :: Integer -> Integer -> Int -> Int
--- somarPontosStrikeSpare strikesSeguidos sparesSeguidos pontuacaoLance = 
---   if (strikesSeguidos > 0) then return (pontuacaoLance)
-
-comecarJogo :: Integer -> [Int] -> [(Int, Int)]-> IO ()
-comecarJogo rodada pontuacao pontosPendentes = do
-  if (rodada > 10) then do
+comecarJogo :: Integer -> [Int] -> [(Int, Int)] -> [(Int, Int)] -> IO ()
+comecarJogo rodada pontuacao pontosCadaRodada pontosPendentes = do
+  if (rodada > 9) then do
     putStrLn("Fim de jogo!")
   else do
     putStrLn("Essa é a rodada " ++ (integerToString rodada))
@@ -158,18 +211,27 @@ comecarJogo rodada pontuacao pontosPendentes = do
     jogada <- getLine
     putStrLn("Pontuacao antes da jogada")
     print pontuacao
-    pontuacaoLance <- (iniciarLance iniciarPinos 0 0)
-    putStrLn("Pinos derrubados")
-    print pontuacaoLance
-    print (calcularNovaPontuacao pontuacao (adicionarPontoPendente pontosPendentes pontuacaoLance rodada) 0)
-    comecarJogo 
-      (rodada+1) 
-      (fst (calcularNovaPontuacao pontuacao (adicionarPontoPendente pontosPendentes pontuacaoLance rodada) 0))
-      (snd (calcularNovaPontuacao pontuacao (adicionarPontoPendente pontosPendentes pontuacaoLance rodada) 0))
+    if (rodada == 9) then do
+      resultadoPontosPendentes <- casoRodada10 pontosPendentes 2
+      print resultadoPontosPendentes
+      print (calcularNovaPontuacao pontuacao resultadoPontosPendentes 0)
+      putStrLn("Chegou aqui!")
+      comecarJogo (rodada+1) (fst (calcularNovaPontuacao pontuacao resultadoPontosPendentes 0)) pontosCadaRodada (snd (calcularNovaPontuacao pontuacao resultadoPontosPendentes 0))
+    else do 
+      pontuacaoLance <- (iniciarLance iniciarPinos 0 0)
+      putStrLn("Pinos derrubados")
+      print pontuacaoLance
+      print pontosCadaRodada
+      print (calcularNovaPontuacao pontuacao (adicionarPontoPendente pontosPendentes pontuacaoLance rodada) 0)
+      imprimeScore (adicionarPontoDaRodada pontosCadaRodada pontuacaoLance rodada) (fst (calcularNovaPontuacao pontuacao (adicionarPontoPendente pontosPendentes pontuacaoLance rodada) 0))
+      comecarJogo 
+        (rodada+1) 
+        (fst (calcularNovaPontuacao pontuacao (adicionarPontoPendente pontosPendentes pontuacaoLance rodada) 0))
+        (adicionarPontoDaRodada pontosCadaRodada pontuacaoLance rodada)
+        (snd (calcularNovaPontuacao pontuacao (adicionarPontoPendente pontosPendentes pontuacaoLance rodada) 0))
 
-
--- falta adicionar bonus 10 rodada
-
+-- imprimir os scores
+-- multiplayer
 
 main :: IO ()
 main = do
@@ -177,14 +239,13 @@ main = do
   putStrLn "Digite seu nome:"
   nome <- getLine
   putStrLn ("Olá " ++ nome ++ ", vamos começar!")
+  putStrLn ("Quantas pessoas vão jogar? Contando com você. Digite um número de 1-4.")
+  jogadores <- getLine
   putStrLn "Iniciando o jogo..."
-  comecarJogo 0 iniciarPontuacao iniciarPontosPendentes
-  -- inicio da parte grafica do gloss
-  -- play
-  --   janela
-  --   black
-  --   10
-  --   informaRodada
-  --   where
-  --     janela = InWindow "Boliche Arcade" (820, 580) (50, 50)
+  comecarJogo 0 iniciarPontuacao iniciarPontosCadaRodada iniciarPontosPendentes
 
+    -- teste grafico
+    -- display 
+    --   (InWindow "Boliche Arcade" (1200, 380) (50, 50))
+    --   white
+    --   mundo  
