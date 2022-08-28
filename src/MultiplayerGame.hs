@@ -8,6 +8,7 @@ import Pontuacao
 import PontosPendentes
 import PontosCadaRodada
 import RodadaUnitaria
+import Bot
 
 comecarJogoMultiplayer :: Integer -> Int -> [String] -> [[Int]] -> [[(Int, Int)]] -> [[(Int, Int)]] -> IO()
 comecarJogoMultiplayer rodada numJogadores nomesJogadores pontuacao pontosCadaRodada pontosPendentes = do
@@ -34,25 +35,38 @@ iniciarRodadaParaCadaJogador rodada numJogadores nomesJogadores pontuacao pontos
   else do
     putStrLn(" ")
     putStrLn("*** Agora é a vez de "++ (nomesJogadores!!counter) ++ " ***")
-    pontuacaoLance <- (iniciarLance iniciarPinos 0 0)
-    -- putStrLn("Pinos derrubados")
     let pontuacaoDoJogador = pontuacao!!counter
     -- print pontuacaoDoJogador
     let pontosPendentesDoJogador = pontosPendentes!!counter
     -- print pontosPendentesDoJogador
     let pontosCadaRodadaDoJogador = pontosCadaRodada!!counter
     -- print pontosCadaRodadaDoJogador
-    let nomeJogador = nomesJogadores!!counter
-    let (novaPontuacaoDoJogador, novosPontosPendentesDoJogador) = (calcularNovaPontuacao pontuacaoDoJogador (adicionarPontoPendente pontosPendentesDoJogador pontuacaoLance rodada) 0)
-    -- print novaPontuacaoDoJogador
-    -- print novosPontosPendentesDoJogador
-    let novosPontosCadaRodadaDoJogador = (adicionarPontoDaRodada pontosCadaRodadaDoJogador pontuacaoLance rodada)
-    imprimeTabela nomeJogador novosPontosCadaRodadaDoJogador novaPontuacaoDoJogador
-    -- print novosPontosCadaRodadaDoJogador
-    let novaPontuacaoJogadores = adicionarPontuacaoJogadores pontuacao novaPontuacaoDoJogador counter
-    let novaPontuacaoPendenteJogadores = adicionarPontosPendentesJogadores pontosPendentes novosPontosPendentesDoJogador counter
-    let novaPontuacaoCadaRodadaJogadores = adicionarPontoCadaRodadaJogadores pontosCadaRodada novosPontosCadaRodadaDoJogador counter
-    iniciarRodadaParaCadaJogador rodada numJogadores nomesJogadores novaPontuacaoJogadores novaPontuacaoCadaRodadaJogadores novaPontuacaoPendenteJogadores (counter+1)
+    -- putStrLn("Pinos derrubados")
+    let nomeDoJogador = nomesJogadores!!counter
+    if (ehBot nomeDoJogador) then do
+      pontuacaoLance <- (iniciarLanceBot iniciarPinos 0 0)
+      let (novaPontuacaoDoJogador, novosPontosPendentesDoJogador) = (calcularNovaPontuacao pontuacaoDoJogador (adicionarPontoPendente pontosPendentesDoJogador pontuacaoLance rodada) 0)
+      -- print novaPontuacaoDoJogador
+      -- print novosPontosPendentesDoJogador
+      let novosPontosCadaRodadaDoJogador = (adicionarPontoDaRodada pontosCadaRodadaDoJogador pontuacaoLance rodada)
+      imprimeTabela nomeDoJogador novosPontosCadaRodadaDoJogador novaPontuacaoDoJogador
+      -- print novosPontosCadaRodadaDoJogador
+      let novaPontuacaoJogadores = adicionarPontuacaoJogadores pontuacao novaPontuacaoDoJogador counter
+      let novaPontuacaoPendenteJogadores = adicionarPontosPendentesJogadores pontosPendentes novosPontosPendentesDoJogador counter
+      let novaPontuacaoCadaRodadaJogadores = adicionarPontoCadaRodadaJogadores pontosCadaRodada novosPontosCadaRodadaDoJogador counter
+      iniciarRodadaParaCadaJogador rodada numJogadores nomesJogadores novaPontuacaoJogadores novaPontuacaoCadaRodadaJogadores novaPontuacaoPendenteJogadores (counter+1)
+    else do
+      pontuacaoLance <- (iniciarLance iniciarPinos 0 0)
+      let (novaPontuacaoDoJogador, novosPontosPendentesDoJogador) = (calcularNovaPontuacao pontuacaoDoJogador (adicionarPontoPendente pontosPendentesDoJogador pontuacaoLance rodada) 0)
+      -- print novaPontuacaoDoJogador
+      -- print novosPontosPendentesDoJogador
+      let novosPontosCadaRodadaDoJogador = (adicionarPontoDaRodada pontosCadaRodadaDoJogador pontuacaoLance rodada)
+      imprimeTabela nomeDoJogador novosPontosCadaRodadaDoJogador novaPontuacaoDoJogador
+      -- print novosPontosCadaRodadaDoJogador
+      let novaPontuacaoJogadores = adicionarPontuacaoJogadores pontuacao novaPontuacaoDoJogador counter
+      let novaPontuacaoPendenteJogadores = adicionarPontosPendentesJogadores pontosPendentes novosPontosPendentesDoJogador counter
+      let novaPontuacaoCadaRodadaJogadores = adicionarPontoCadaRodadaJogadores pontosCadaRodada novosPontosCadaRodadaDoJogador counter
+      iniciarRodadaParaCadaJogador rodada numJogadores nomesJogadores novaPontuacaoJogadores novaPontuacaoCadaRodadaJogadores novaPontuacaoPendenteJogadores (counter+1)
 
 iniciarRodada10ParaCadaJogador :: Integer -> Int -> [String] -> [[Int]] -> [[(Int, Int)]] -> [[(Int, Int)]] -> Int -> IO([[Int]], [[(Int, Int)]], [[(Int, Int)]])
 iniciarRodada10ParaCadaJogador rodada numJogadores nomesJogadores pontuacao pontosCadaRodada pontosPendentes counter = do

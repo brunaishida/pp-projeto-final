@@ -47,6 +47,35 @@ iniciarLance pinos pontuacao nLance = do
         putStrLn("Você acertou "++ (intToString totalPinosDerrubados) ++ " pinos!!")
         iniciarLance resultadoPinos totalPinosDerrubados (nLance+1)
 
+iniciarLanceBot :: [String] -> Int -> Integer -> IO (Int, Int)
+iniciarLanceBot pinos pontuacao nLance = do
+  if (nLance == 1) then do
+    putStrLn(" ")
+    putStrLn("Lance numero 2")
+    putStrLn("O bot jogou a bola!")
+    pinosParaDerrubar <- getStdRandom $ randomR (0, 9 :: Integer)
+    resultadoPinos <- (resultadoJogada pinosParaDerrubar pinos)
+    let totalPinosDerrubados = (calculaPontuacao pinos resultadoPinos)
+    putStrLn("O bot acertou "++ (intToString totalPinosDerrubados) ++ " pinos!!")
+    putStrLn("---------------Total Lance = " ++ (intToString (pontuacao + totalPinosDerrubados)) ++ " pontos ---------------")
+    return (pontuacao, totalPinosDerrubados)
+  else do
+      putStrLn(" ")
+      putStrLn("Lance número 1")
+      putStrLn("O bot jogou a bola!")
+      pinosParaDerrubar <- getStdRandom $ randomR (0, 9 :: Integer)
+      if (pinosParaDerrubar == 9) then do 
+        putStrLn("Strike!!!!!!!")
+        putStrLn("O bot acertou 10 pinos!!")
+        return (10,0) -- saberemos que é um Strike
+      else do
+        resultadoPinos <- (resultadoJogada pinosParaDerrubar pinos)
+        let totalPinosDerrubados = (calculaPontuacao pinos resultadoPinos)
+        putStrLn("O bot acertou "++ (intToString totalPinosDerrubados) ++ " pinos!!")
+        iniciarLanceBot resultadoPinos totalPinosDerrubados (nLance+1)
+
+-- notificar quando é spare
+
 casoRodada10 :: [(Int, Int)] -> [(Int, Int)] -> Integer -> IO ([(Int, Int)], [(Int, Int)]) 
 casoRodada10 pontosPendentes pontosCadaRodada 0 = do
   -- putStrLn("Rodada 0")
