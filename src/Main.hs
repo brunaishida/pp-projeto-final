@@ -2,6 +2,12 @@ module Main where
 import System.Random
 import Data.List
 
+intToString :: Int -> String
+intToString n = show n
+
+stringToInt :: String -> Int
+stringToInt n = read n ::Int
+
 integerToString :: Integer -> String
 integerToString n = show n
 
@@ -14,11 +20,20 @@ iniciarPinos = ["0" | x <- [0..9], True]
 iniciarPontosCadaRodada :: [(Int, Int)]
 iniciarPontosCadaRodada = [(-1,-1) | x <- [0..11], True]
 
+iniciarPontosCadaRodadaMultiplayer :: Int -> [[(Int, Int)]]
+iniciarPontosCadaRodadaMultiplayer n = [iniciarPontosCadaRodada | x <- [0..(n-1)], True]
+
 adicionarPontoDaRodada :: [(Int, Int)] -> (Int, Int) -> Integer -> [(Int, Int)]
 adicionarPontoDaRodada pontosDaRodada novoPonto posicao = take (integerToInt posicao) pontosDaRodada ++ novoPonto : drop ((integerToInt posicao)+1) pontosDaRodada
 
+adicionarPontoCadaRodadaJogadores :: [[(Int, Int)]] -> [(Int, Int)] -> Int -> [[(Int, Int)]]
+adicionarPontoCadaRodadaJogadores pontosCadaRodadaJogadores novoPonto posicao = take posicao pontosCadaRodadaJogadores ++ novoPonto : drop (posicao+1) pontosCadaRodadaJogadores
+
 iniciarPontuacao :: [Int]
 iniciarPontuacao = [0 | x <- [0..9], True]
+
+iniciarPontuacaoMultiplayer :: Int -> [[Int]]
+iniciarPontuacaoMultiplayer n = [iniciarPontuacao | x <- [0..(n-1)], True]
 
 somaTotalPotuacao :: [Int] -> Int
 somaTotalPotuacao [] = 0
@@ -27,11 +42,21 @@ somaTotalPotuacao (x:xs) = x + (somaTotalPotuacao xs)
 adicionarPontuacao :: [Int] -> Int -> Integer -> [Int]
 adicionarPontuacao pontuacao novoPonto posicao = take (integerToInt posicao) pontuacao ++ ((pontuacao!!(integerToInt posicao))+novoPonto) : drop ((integerToInt posicao)+1) pontuacao
  
+adicionarPontuacaoJogadores :: [[Int]] -> [Int] -> Int -> [[Int]]
+adicionarPontuacaoJogadores pontuacaoJogadores novaPontuacao posicao = take posicao pontuacaoJogadores ++ novaPontuacao : drop (posicao+1) pontuacaoJogadores
+
 iniciarPontosPendentes :: [(Int, Int)]
 iniciarPontosPendentes = [(-1,-1) | x <- [0..11], True]
 
+iniciarPontosPendentesMultiplayer :: Int -> [[(Int, Int)]]
+iniciarPontosPendentesMultiplayer n = [iniciarPontosPendentes | x <- [0..(n-1)], True]
+
 adicionarPontoPendente :: [(Int, Int)] -> (Int, Int) -> Integer -> [(Int, Int)]
 adicionarPontoPendente pontosPendentes novoPonto posicao = take (integerToInt posicao) pontosPendentes ++ novoPonto : drop ((integerToInt posicao)+1) pontosPendentes
+
+adicionarPontosPendentesJogadores :: [[(Int, Int)]] -> [(Int, Int)] -> Int -> [[(Int, Int)]]
+adicionarPontosPendentesJogadores pontosPendentesJogadores novoPontosPendentes posicao = 
+  take posicao pontosPendentesJogadores ++ novoPontosPendentes : drop (posicao+1) pontosPendentesJogadores
 
 zerarPontoPendente :: [(Int, Int)] -> Integer -> [(Int, Int)]
 zerarPontoPendente pontosPendentes posicao = adicionarPontoPendente pontosPendentes (-1,-1) posicao
@@ -154,22 +179,30 @@ calculaPontuacao pinosPosicaoAnterior pinosNovaPosicao = (calculaPontos (filtraP
 iniciarLance :: [String] -> Int -> Integer -> IO (Int, Int)
 iniciarLance pinos pontuacao nLance = do
   if (nLance == 1) then do
+    putStrLn("Lance número 2")
+    putStrLn("Aperte enter para jogar a bola!")
+    jogada <- getLine
     pinosParaDerrubar <- getStdRandom $ randomR (0, 9 :: Integer)
-    -- print pinosParaDerrubar
     resultadoPinos <- (resultadoJogada pinosParaDerrubar pinos)
-    -- print (filtraPinosNovosDerrubados pinos resultadoPinos)
-    -- putStrLn("Pontuacao!")
-    -- print (calculaPontuacao pinos resultadoPinos)
-    return (pontuacao, (calculaPontuacao pinos resultadoPinos))
+    let totalPinosDerrubados = (calculaPontuacao pinos resultadoPinos)
+    putStrLn("Você acertou "++ (intToString totalPinosDerrubados) ++ " pinos!!")
+
+    putStrLn("---------------Total Lance = " ++ (intToString (pontuacao + totalPinosDerrubados)) ++ " pontos ---------------") 
+    return (pontuacao, totalPinosDerrubados)
   else do
+      putStrLn("Lance número 1")
+      putStrLn("Aperte enter para jogar a bola!")
+      jogada <- getLine
       pinosParaDerrubar <- getStdRandom $ randomR (0, 9 :: Integer)
-      if (pinosParaDerrubar == 9) then do return (10,0) -- saberemos que é um Strike
+      if (pinosParaDerrubar == 9) then do 
+        putStrLn("Strike!!!!!!!")
+        putStrLn("Você acertou 10 pinos!!")
+        return (10,0) -- saberemos que é um Strike
       else do
         resultadoPinos <- (resultadoJogada pinosParaDerrubar pinos)
-        -- print (filtraPinosNovosDerrubados pinos resultadoPinos)
-        -- putStrLn("Pinos Derrubados!")
-        -- print (calculaPontuacao pinos resultadoPinos)
-        iniciarLance resultadoPinos (calculaPontuacao pinos resultadoPinos) (nLance+1)
+        let totalPinosDerrubados = (calculaPontuacao pinos resultadoPinos)
+        putStrLn("Você acertou "++ (intToString totalPinosDerrubados) ++ " pinos!!")
+        iniciarLance resultadoPinos totalPinosDerrubados (nLance+1)
 
 casoRodada10 :: [(Int, Int)] -> Integer -> IO [(Int, Int)] 
 casoRodada10 pontosPendentes 0 = do
@@ -202,9 +235,7 @@ comecarJogo rodada pontuacao pontosCadaRodada pontosPendentes = do
   if (rodada > 9) then do
     putStrLn("Fim de jogo!")
   else do
-    putStrLn("Essa é a rodada " ++ (integerToString rodada))
-    putStrLn("Digite algo para começar!")
-    jogada <- getLine
+    putStrLn("*-------------------------Rodada " ++ (integerToString (rodada+1)) ++ "-------------------------*")
     putStrLn("Pontuacao antes da jogada")
     print pontuacao
     if (rodada == 9) then do
@@ -226,11 +257,52 @@ comecarJogo rodada pontuacao pontosCadaRodada pontosPendentes = do
         (adicionarPontoDaRodada pontosCadaRodada pontuacaoLance rodada)
         (snd (calcularNovaPontuacao pontuacao (adicionarPontoPendente pontosPendentes pontuacaoLance rodada) 0))
 
+iniciarRodadaParaCadaJogador :: Integer -> Int -> [String] -> [[Int]] -> [[(Int, Int)]] -> [[(Int, Int)]] -> Int -> IO([[Int]], [[(Int, Int)]], [[(Int, Int)]])
+iniciarRodadaParaCadaJogador rodada numJogadores nomesJogadores pontuacao pontosCadaRodada pontosPendentes counter = do
+  if (counter == numJogadores) then do
+    return (pontuacao, pontosCadaRodada, pontosPendentes)
+  else do
+    putStrLn("Agora é a vez do "++ (nomesJogadores!!counter))
+    pontuacaoLance <- (iniciarLance iniciarPinos 0 0)
+    putStrLn("Pinos derrubados")
+    let pontuacaoDoJogador = pontuacao!!counter
+    -- print pontuacaoDoJogador
+    let pontosPendentesDoJogador = pontosPendentes!!counter
+    -- print pontosPendentesDoJogador
+    let pontosCadaRodadaDoJogador = pontosCadaRodada!!counter
+    -- print pontosCadaRodadaDoJogador
+    let (novaPontuacaoDoJogador, novosPontosPendentesDoJogador) = (calcularNovaPontuacao pontuacaoDoJogador (adicionarPontoPendente pontosPendentesDoJogador pontuacaoLance rodada) 0)
+    print novaPontuacaoDoJogador
+    print novosPontosPendentesDoJogador
+    let novosPontosCadaRodadaDoJogador = (adicionarPontoDaRodada pontosCadaRodadaDoJogador pontuacaoLance rodada)
+    print novosPontosCadaRodadaDoJogador
+    let novaPontuacaoJogadores = adicionarPontuacaoJogadores pontuacao novaPontuacaoDoJogador counter
+    let novaPontuacaoPendenteJogadores = adicionarPontosPendentesJogadores pontosPendentes novosPontosPendentesDoJogador counter
+    let novaPontuacaoCadaRodadaJogadores = adicionarPontoCadaRodadaJogadores pontosCadaRodada novosPontosCadaRodadaDoJogador counter
+    iniciarRodadaParaCadaJogador rodada numJogadores nomesJogadores novaPontuacaoJogadores novaPontuacaoCadaRodadaJogadores novaPontuacaoPendenteJogadores (counter+1)
+
+comecarJogoMultiplayer :: Integer -> Int -> [String] -> [[Int]] -> [[(Int, Int)]] -> [[(Int, Int)]] -> IO()
+comecarJogoMultiplayer rodada numJogadores nomesJogadores pontuacao pontosCadaRodada pontosPendentes = do
+  if (rodada > 9) then do
+    putStrLn("Fim de jogo!")
+  else do
+    putStrLn("*-------------------------Rodada " ++ (integerToString (rodada+1)) ++ "-------------------------*")
+    resultadoRodada <- (iniciarRodadaParaCadaJogador rodada numJogadores nomesJogadores pontuacao pontosCadaRodada pontosPendentes 0)
+    let (novaPontuacao, novosPontosCadaRodada, novosPontosPendentes) = resultadoRodada
+    comecarJogoMultiplayer (rodada+1) numJogadores nomesJogadores novaPontuacao novosPontosCadaRodada novosPontosPendentes
+
 -- imprimir os scores
--- multiplayer
 
+adicionaNomeJogador :: [String] -> String -> [String] 
+adicionaNomeJogador [] nome = [nome]
+adicionaNomeJogador (nomeJogador:nomesJogadores) nome = nomeJogador : (adicionaNomeJogador nomesJogadores nome)
 
-
+receberNomeJogadores :: Int -> [String] -> Int -> IO [String]
+receberNomeJogadores nJogadores nomesJogadores 1 =do return nomesJogadores
+receberNomeJogadores nJogadores nomesJogadores counter= do
+  putStrLn("Adicione o nome do jogador " ++ (intToString (nJogadores-counter+2)))
+  nomeJogador <- getLine
+  receberNomeJogadores nJogadores (adicionaNomeJogador nomesJogadores nomeJogador) (counter-1)
 
 main :: IO ()
 main = do
@@ -238,9 +310,19 @@ main = do
   putStrLn "Digite seu nome:"
   nome <- getLine
   putStrLn ("Olá " ++ nome ++ ", vamos começar!")
-  putStrLn ("Quantas pessoas vão jogar? Contando com você. Digite um número de 1-4.")
-  jogadores <- getLine
+  putStrLn ("Quantas pessoas vão jogar? Contando com você. Digite um número de 2-4.")
+  nJogadores <- getLine
+  let nJogadoresInt = (stringToInt nJogadores)
+  nomesJogadores <- receberNomeJogadores nJogadoresInt [nome] nJogadoresInt
+  print nomesJogadores
   putStrLn "Iniciando o jogo..."
-  comecarJogo 0 iniciarPontuacao iniciarPontosCadaRodada iniciarPontosPendentes
+  let pontuacao = iniciarPontuacaoMultiplayer nJogadoresInt
+  let pontosCadaRodada = iniciarPontosCadaRodadaMultiplayer nJogadoresInt
+  let pontosPendentes = iniciarPontosPendentesMultiplayer nJogadoresInt
+  print pontuacao
+  print pontosCadaRodada
+  print pontosPendentes
+  comecarJogoMultiplayer 0 nJogadoresInt nomesJogadores pontuacao pontosCadaRodada pontosPendentes
+  -- comecarJogo 0 iniciarPontuacao iniciarPontosCadaRodada iniciarPontosPendentes
 
 
