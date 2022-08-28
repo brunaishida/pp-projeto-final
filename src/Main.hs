@@ -191,7 +191,7 @@ iniciarLance pinos pontuacao nLance = do
     putStrLn("Lance número 2")
     putStrLn("Aperte enter para jogar a bola!")
     jogada <- getLine
-    pinosParaDerrubar <- getStdRandom $ randomR (0, 9 :: Integer)
+    pinosParaDerrubar <- getStdRandom $ randomR (9, 9 :: Integer)
     resultadoPinos <- (resultadoJogada pinosParaDerrubar pinos)
     let totalPinosDerrubados = (calculaPontuacao pinos resultadoPinos)
     putStrLn("Você acertou "++ (intToString totalPinosDerrubados) ++ " pinos!!")
@@ -202,7 +202,7 @@ iniciarLance pinos pontuacao nLance = do
       putStrLn("Lance número 1")
       putStrLn("Aperte enter para jogar a bola!")
       jogada <- getLine
-      pinosParaDerrubar <- getStdRandom $ randomR (0, 9 :: Integer)
+      pinosParaDerrubar <- getStdRandom $ randomR (9, 9 :: Integer)
       if (pinosParaDerrubar == 9) then do 
         putStrLn("Strike!!!!!!!")
         putStrLn("Você acertou 10 pinos!!")
@@ -219,9 +219,10 @@ casoRodada10 pontosPendentes pontosCadaRodada 0 = do
   -- print pontosPendentes
   putStrLn("Aperte enter para jogar a bola!")
   jogada <- getLine
-  pontuacaoLance <- (iniciarLance iniciarPinos 0 0)
-  let primeiroLance = fst pontuacaoLance
-  let valorRodada = (primeiroLance, 0)
+  pontuacaoLance <- getStdRandom $ randomR (9, 9 :: Int)
+  putStrLn("Você acertou "++ (intToString pontuacaoLance) ++ " pinos!!")
+  putStrLn("---------------Total Lance = " ++ (intToString pontuacaoLance) ++ " pontos ---------------")
+  let valorRodada = (pontuacaoLance, 0)
   let novosPontosPendentes = (adicionarPontoPendente pontosPendentes valorRodada 11)
   let novosPontosCadaRodada = (adicionarPontoDaRodada pontosCadaRodada valorRodada 11)
   return (novosPontosPendentes, novosPontosCadaRodada)
