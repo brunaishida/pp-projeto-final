@@ -1,6 +1,8 @@
 module Main where
 import System.Random
 import Data.List
+import Data.Function (on)
+import Data.Ord
 
 intToString :: Int -> String
 intToString n = show n
@@ -322,10 +324,52 @@ iniciarRodada10ParaCadaJogador rodada numJogadores nomesJogadores pontuacao pont
     iniciarRodada10ParaCadaJogador rodada numJogadores nomesJogadores novaPontuacaoJogadores novaPontuacaoCadaRodadaJogadores novaPontuacaoPendenteJogadores (counter+1)
 
 
+pontuacaoTotal :: [[Int]] -> [Int]
+pontuacaoTotal [] = []
+pontuacaoTotal (x:xs) = somaTotalPotuacao x : pontuacaoTotal xs
+
+sortGT :: (Int, String) -> (Int, String) -> Ordering
+sortGT (a1, b1) (a2, b2)
+  | a1 < a2 = GT
+  | a1 > a2 = LT
+  | a1 == a2 = compare b1 b2
+
+ordenaPeloPrimeiroDaTupla :: [(Int, String)] -> [(Int, String)]
+ordenaPeloPrimeiroDaTupla = sortBy sortGT
+
+transformaEmTuplaDeRanking :: Int -> [String] -> [Int] -> [(Int, String)]
+transformaEmTuplaDeRanking numJogadores nomesJogadores pontuacaoTotal = 
+  [((pontuacaoTotal!!x),(nomesJogadores!!x)) | x <- [0..(numJogadores-1)], True]
+
+calculaRanking :: Int -> [String] -> [[Int]] -> IO()
+calculaRanking numJogadores nomesJogadores pontuacao = do
+  let pontuacaoTotalJogadores = pontuacaoTotal pontuacao
+  let tuplaRanking = transformaEmTuplaDeRanking numJogadores nomesJogadores pontuacaoTotalJogadores
+  let rankingOrdenado = ordenaPeloPrimeiroDaTupla tuplaRanking
+  print rankingOrdenado
+  let (pontosPrimeiroColocado, nomePrimeiroColocado) = rankingOrdenado!!0
+  putStrLn("E o vencedor foi: " ++ nomePrimeiroColocado ++ " com " ++ (intToString pontosPrimeiroColocado) ++ " pontos!")
+  let (pontosSegundoColocado, nomeSegundoColocado) = rankingOrdenado!!1
+  putStrLn("O segundo colocado foi: " ++ nomeSegundoColocado ++ " com " ++ (intToString pontosSegundoColocado) ++ " pontos!")
+  if (numJogadores > 2) then do
+    let (pontosTerceiroColocado, nomeTerceiroColocado) = rankingOrdenado!!2
+    putStrLn("O terceito colocado foi: " ++ nomeTerceiroColocado ++ " com " ++ (intToString pontosTerceiroColocado) ++ " pontos!")
+    if (numJogadores > 3) then do
+      let (pontosQuartoColocado, nomeQuartoColocado) = rankingOrdenado!!3
+      putStrLn("O quarto colocado foi: " ++ nomeQuartoColocado ++ " com " ++ (intToString pontosQuartoColocado) ++ " pontos!")
+      putStrLn("Fim de jogo!")
+    else
+      putStrLn("Fim de jogo!")
+  else
+    putStrLn("Fim de jogo!")
+
+
 comecarJogoMultiplayer :: Integer -> Int -> [String] -> [[Int]] -> [[(Int, Int)]] -> [[(Int, Int)]] -> IO()
 comecarJogoMultiplayer rodada numJogadores nomesJogadores pontuacao pontosCadaRodada pontosPendentes = do
   if (rodada > 9) then do
     putStrLn("Fim de jogo!")
+    putStrLn("Calculando resultados...")
+    calculaRanking numJogadores nomesJogadores pontuacao
   else do
     if (rodada < 9) then do
       putStrLn("*-------------------------Rodada " ++ (integerToString (rodada+1)) ++ "-------------------------*")
@@ -341,6 +385,8 @@ comecarJogoMultiplayer rodada numJogadores nomesJogadores pontuacao pontosCadaRo
 
 
 -- imprimir os scores
+-- tratar o numero de jogadores
+-- resultado do jogo
 
 adicionaNomeJogador :: [String] -> String -> [String] 
 adicionaNomeJogador [] nome = [nome]
