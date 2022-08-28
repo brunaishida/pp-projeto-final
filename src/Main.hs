@@ -209,6 +209,8 @@ iniciarLance pinos pontuacao nLance = do
 casoRodada10 :: [(Int, Int)] -> [(Int, Int)] -> Integer -> IO ([(Int, Int)], [(Int, Int)]) 
 casoRodada10 pontosPendentes pontosCadaRodada 0 = do
   putStrLn("Rodada 0")
+  putStrLn("Aperte enter para jogar a bola!")
+  jogada <- getLine
   print pontosPendentes
   pontuacaoLance <- (iniciarLance iniciarPinos 0 0)
   let primeiroLance = fst pontuacaoLance
@@ -218,6 +220,8 @@ casoRodada10 pontosPendentes pontosCadaRodada 0 = do
   return (novosPontosPendentes, novosPontosCadaRodada)
 casoRodada10 pontosPendentes pontosCadaRodada 1 = do 
   putStrLn("Rodada 1")
+  putStrLn("Aperte enter para jogar a bola!")
+  jogada <- getLine
   print pontosPendentes
   pontuacaoLance <- (iniciarLance iniciarPinos 0 0)
   if (somaPontosLance pontuacaoLance == 10) then do
@@ -231,6 +235,8 @@ casoRodada10 pontosPendentes pontosCadaRodada 1 = do
       return (novosPontosPendentes, novosPontosCadaRodada)
 casoRodada10 pontosPendentes pontosCadaRodada 2 = do
   putStrLn("Rodada 2")
+  putStrLn("Aperte enter para jogar a bola!")
+  jogada <- getLine
   print pontosPendentes
   pontuacaoLance <- (iniciarLance iniciarPinos 0 0)
   if (fst pontuacaoLance == 10) then do
