@@ -230,6 +230,12 @@ comecarJogo rodada pontuacao pontosCadaRodada pontosPendentes = do
         (adicionarPontoDaRodada pontosCadaRodada pontuacaoLance rodada)
         (snd (calcularNovaPontuacao pontuacao (adicionarPontoPendente pontosPendentes pontuacaoLance rodada) 0))
 
+-- handleEvent :: Event -> Frames -> Frames
+-- handleEvent (EventKey (SpecialKey k) Down _ _) =
+--   if rodada > 9 && mundoUm                                       
+--      then fimJogoUm                                         
+--      else jogada
+
 -- imprimir os scores
 -- multiplayer
 
@@ -244,8 +250,10 @@ main = do
   putStrLn "Iniciando o jogo..."
   comecarJogo 0 iniciarPontuacao iniciarPontosCadaRodada iniciarPontosPendentes
 
-    -- teste grafico
+  -- teste grafico
     -- display 
-    --   (InWindow "Boliche Arcade" (1200, 380) (50, 50))
+    --   janela
     --   white
-    --   mundo  
+    --   mundoUm
+    --   where
+    --     janela = (InWindow "Boliche Arcade" (1200, 680) (50, 50)) 
