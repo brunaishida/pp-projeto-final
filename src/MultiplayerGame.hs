@@ -41,22 +41,20 @@ iniciarRodadaParaCadaJogador rodada numJogadores nomesJogadores pontuacao pontos
     let nomeDoJogador = nomesJogadores!!counter
     if (ehBot nomeDoJogador) then do
       pontuacaoLance <- (iniciarLanceBot iniciarPinos 0 0)
-      let (novaPontuacaoDoJogador, novosPontosPendentesDoJogador) = (calcularNovaPontuacao pontuacaoDoJogador (adicionarPontoPendente pontosPendentesDoJogador pontuacaoLance rodada) 0)
-      let novosPontosCadaRodadaDoJogador = (adicionarPontoDaRodada pontosCadaRodadaDoJogador pontuacaoLance rodada)
-      imprimeTabela nomeDoJogador novosPontosCadaRodadaDoJogador novaPontuacaoDoJogador
-      let novaPontuacaoJogadores = adicionarPontuacaoJogadores pontuacao novaPontuacaoDoJogador counter
-      let novaPontuacaoPendenteJogadores = adicionarPontosPendentesJogadores pontosPendentes novosPontosPendentesDoJogador counter
-      let novaPontuacaoCadaRodadaJogadores = adicionarPontoCadaRodadaJogadores pontosCadaRodada novosPontosCadaRodadaDoJogador counter
-      iniciarRodadaParaCadaJogador rodada numJogadores nomesJogadores novaPontuacaoJogadores novaPontuacaoCadaRodadaJogadores novaPontuacaoPendenteJogadores (counter+1)
+      atualizaFunc pontuacaoDoJogador pontosPendentesDoJogador pontuacaoLance pontosCadaRodadaDoJogador nomeDoJogador
     else do
       pontuacaoLance <- (iniciarLance iniciarPinos 0 0)
-      let (novaPontuacaoDoJogador, novosPontosPendentesDoJogador) = (calcularNovaPontuacao pontuacaoDoJogador (adicionarPontoPendente pontosPendentesDoJogador pontuacaoLance rodada) 0)
-      let novosPontosCadaRodadaDoJogador = (adicionarPontoDaRodada pontosCadaRodadaDoJogador pontuacaoLance rodada)
-      imprimeTabela nomeDoJogador novosPontosCadaRodadaDoJogador novaPontuacaoDoJogador
-      let novaPontuacaoJogadores = adicionarPontuacaoJogadores pontuacao novaPontuacaoDoJogador counter
-      let novaPontuacaoPendenteJogadores = adicionarPontosPendentesJogadores pontosPendentes novosPontosPendentesDoJogador counter
-      let novaPontuacaoCadaRodadaJogadores = adicionarPontoCadaRodadaJogadores pontosCadaRodada novosPontosCadaRodadaDoJogador counter
-      iniciarRodadaParaCadaJogador rodada numJogadores nomesJogadores novaPontuacaoJogadores novaPontuacaoCadaRodadaJogadores novaPontuacaoPendenteJogadores (counter+1)
+      atualizaFunc pontuacaoDoJogador pontosPendentesDoJogador pontuacaoLance pontosCadaRodadaDoJogador nomeDoJogador
+    where 
+      atualizaFunc pontuacaoDoJogador pontosPendentesDoJogador pontuacaoLance pontosCadaRodadaDoJogador nomeDoJogador = do    
+        let (novaPontuacaoDoJogador, novosPontosPendentesDoJogador) = (calcularNovaPontuacao pontuacaoDoJogador (adicionarPontoPendente pontosPendentesDoJogador pontuacaoLance rodada) 0)
+        let novosPontosCadaRodadaDoJogador = (adicionarPontoDaRodada pontosCadaRodadaDoJogador pontuacaoLance rodada)
+        imprimeTabela nomeDoJogador novosPontosCadaRodadaDoJogador novaPontuacaoDoJogador
+        let novaPontuacaoJogadores = adicionarPontuacaoJogadores pontuacao novaPontuacaoDoJogador counter
+        let novaPontuacaoPendenteJogadores = adicionarPontosPendentesJogadores pontosPendentes novosPontosPendentesDoJogador counter
+        let novaPontuacaoCadaRodadaJogadores = adicionarPontoCadaRodadaJogadores pontosCadaRodada novosPontosCadaRodadaDoJogador counter
+        iniciarRodadaParaCadaJogador rodada numJogadores nomesJogadores novaPontuacaoJogadores novaPontuacaoCadaRodadaJogadores novaPontuacaoPendenteJogadores (counter+1)
+
 
 iniciarRodada10ParaCadaJogador :: Integer -> Int -> [String] -> [[Int]] -> [[(Int, Int)]] -> [[(Int, Int)]] -> Int -> IO([[Int]], [[(Int, Int)]], [[(Int, Int)]])
 iniciarRodada10ParaCadaJogador rodada numJogadores nomesJogadores pontuacao pontosCadaRodada pontosPendentes counter = do
@@ -65,15 +63,22 @@ iniciarRodada10ParaCadaJogador rodada numJogadores nomesJogadores pontuacao pont
   else do
     putStrLn(" ")
     putStrLn("*** Agora eh a vez de "++ (nomesJogadores!!counter) ++ " ***")
-    let nomeJogador = nomesJogadores!!counter
+    let nomeDoJogador = nomesJogadores!!counter
     let pontuacaoDoJogador = pontuacao!!counter
     let pontosPendentesDoJogador = pontosPendentes!!counter
     let pontosCadaRodadaDoJogador = pontosCadaRodada!!counter
-    resultadoPontosPendentes <- casoRodada10 pontosPendentesDoJogador pontosCadaRodadaDoJogador 2
-    let (novosPontosPendentesDoJogador1, novosPontosCadaRodadaDoJogador) = resultadoPontosPendentes
-    let (novaPontuacaoDoJogador, novosPontosPendentesDoJogador) = (calcularNovaPontuacao pontuacaoDoJogador novosPontosPendentesDoJogador1 0)
-    let novaPontuacaoJogadores = adicionarPontuacaoJogadores pontuacao novaPontuacaoDoJogador counter
-    let novaPontuacaoPendenteJogadores = adicionarPontosPendentesJogadores pontosPendentes novosPontosPendentesDoJogador counter
-    let novaPontuacaoCadaRodadaJogadores = adicionarPontoCadaRodadaJogadores pontosCadaRodada novosPontosCadaRodadaDoJogador counter
-    imprimeTabela nomeJogador novosPontosCadaRodadaDoJogador novaPontuacaoDoJogador
-    iniciarRodada10ParaCadaJogador rodada numJogadores nomesJogadores novaPontuacaoJogadores novaPontuacaoCadaRodadaJogadores novaPontuacaoPendenteJogadores (counter+1)
+    if (ehBot nomeDoJogador) then do
+      resultadoPontosPendentes <- (casoRodada10Bot pontosPendentesDoJogador pontosCadaRodadaDoJogador 2)
+      atualizaFunc pontuacaoDoJogador pontosPendentesDoJogador resultadoPontosPendentes pontosCadaRodadaDoJogador nomeDoJogador
+    else do
+      resultadoPontosPendentes <- casoRodada10 pontosPendentesDoJogador pontosCadaRodadaDoJogador 2
+      atualizaFunc pontuacaoDoJogador pontosPendentesDoJogador resultadoPontosPendentes  pontosCadaRodadaDoJogador nomeDoJogador
+    where 
+      atualizaFunc pontuacaoDoJogador pontosPendentesDoJogador resultadoPontosPendentes pontosCadaRodadaDoJogador nomeDoJogador = do    
+        let (novosPontosPendentesDoJogador1, novosPontosCadaRodadaDoJogador) = resultadoPontosPendentes
+        let (novaPontuacaoDoJogador, novosPontosPendentesDoJogador) = (calcularNovaPontuacao pontuacaoDoJogador novosPontosPendentesDoJogador1 0)
+        let novaPontuacaoJogadores = adicionarPontuacaoJogadores pontuacao novaPontuacaoDoJogador counter
+        let novaPontuacaoPendenteJogadores = adicionarPontosPendentesJogadores pontosPendentes novosPontosPendentesDoJogador counter
+        let novaPontuacaoCadaRodadaJogadores = adicionarPontoCadaRodadaJogadores pontosCadaRodada novosPontosCadaRodadaDoJogador counter
+        imprimeTabela nomeDoJogador novosPontosCadaRodadaDoJogador novaPontuacaoDoJogador
+        iniciarRodada10ParaCadaJogador rodada numJogadores nomesJogadores novaPontuacaoJogadores novaPontuacaoCadaRodadaJogadores novaPontuacaoPendenteJogadores (counter+1)

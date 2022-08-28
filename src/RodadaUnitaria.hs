@@ -77,8 +77,6 @@ iniciarLanceBot pinos pontuacao nLance = do
         putStrLn("O bot acertou "++ (intToString totalPinosDerrubados) ++ " pinos!!")
         iniciarLanceBot resultadoPinos totalPinosDerrubados (nLance+1)
 
--- notificar quando é spare
-
 casoRodada10 :: [(Int, Int)] -> [(Int, Int)] -> Integer -> IO ([(Int, Int)], [(Int, Int)]) 
 casoRodada10 pontosPendentes pontosCadaRodada 0 = do
   putStrLn("Aperte enter para jogar a bola!")
@@ -113,11 +111,46 @@ casoRodada10 pontosPendentes pontosCadaRodada 2 = do
     let novosPontosCadaRodada = (adicionarPontoDaRodada pontosCadaRodada valorRodada 9)
     casoRodada10 novosPontosPendentes novosPontosCadaRodada 1
   else do
+    let novosPontosPendentes = (adicionarPontoPendente pontosPendentes pontuacaoLance 9)
+    let novosPontosCadaRodada = (adicionarPontoDaRodada pontosCadaRodada pontuacaoLance 9)
     if (somaPontosLance pontuacaoLance == 10) then do
-      let novosPontosPendentes = (adicionarPontoPendente pontosPendentes pontuacaoLance 9)
-      let novosPontosCadaRodada = (adicionarPontoDaRodada pontosCadaRodada pontuacaoLance 9)
       casoRodada10 novosPontosPendentes novosPontosCadaRodada 0
     else do
-      let novosPontosPendentes = (adicionarPontoPendente pontosPendentes pontuacaoLance 9)
-      let novosPontosCadaRodada = (adicionarPontoDaRodada pontosCadaRodada pontuacaoLance 9)
       return (novosPontosPendentes, novosPontosCadaRodada)
+
+
+casoRodada10Bot :: [(Int, Int)] -> [(Int, Int)] -> Integer -> IO ([(Int, Int)], [(Int, Int)]) 
+casoRodada10Bot pontosPendentes pontosCadaRodada 0 = do
+  pontuacaoLance <- getStdRandom $ randomR (0, 9 :: Int)
+  putStrLn("O bot acertou "++ (intToString pontuacaoLance) ++ " pinos!!")
+  putStrLn("---------------Total Lance = " ++ (intToString pontuacaoLance) ++ " pontos ---------------")
+  let valorRodada = (pontuacaoLance, 0)
+  let novosPontosPendentes = (adicionarPontoPendente pontosPendentes valorRodada 11)
+  let novosPontosCadaRodada = (adicionarPontoDaRodada pontosCadaRodada valorRodada 11)
+  return (novosPontosPendentes, novosPontosCadaRodada)
+casoRodada10Bot pontosPendentes pontosCadaRodada 1 = do 
+  pontuacaoLance <- (iniciarLanceBot iniciarPinos 0 0)
+  if (somaPontosLance pontuacaoLance == 10) then do
+      let valorRodada = (10, 0)
+      let novosPontosPendentes = (adicionarPontoPendente pontosPendentes valorRodada 10)
+      let novosPontosCadaRodada = (adicionarPontoDaRodada pontosCadaRodada valorRodada 10)
+      casoRodada10Bot novosPontosPendentes novosPontosCadaRodada 0
+  else do
+      let novosPontosPendentes = (adicionarPontoPendente pontosPendentes pontuacaoLance 10)
+      let novosPontosCadaRodada = (adicionarPontoDaRodada pontosCadaRodada pontuacaoLance 10)
+      return (novosPontosPendentes, novosPontosCadaRodada)
+casoRodada10Bot pontosPendentes pontosCadaRodada 2 = do
+  pontuacaoLance <- (iniciarLanceBot iniciarPinos 0 0)
+  if (fst pontuacaoLance == 10) then do
+    let valorRodada = (10, 0)
+    let novosPontosPendentes = (adicionarPontoPendente pontosPendentes valorRodada 9)
+    let novosPontosCadaRodada = (adicionarPontoDaRodada pontosCadaRodada valorRodada 9)
+    casoRodada10Bot novosPontosPendentes novosPontosCadaRodada 1
+  else do
+    let novosPontosPendentes = (adicionarPontoPendente pontosPendentes pontuacaoLance 9)
+    let novosPontosCadaRodada = (adicionarPontoDaRodada pontosCadaRodada pontuacaoLance 9)
+    if (somaPontosLance pontuacaoLance == 10) then do
+      casoRodada10Bot novosPontosPendentes novosPontosCadaRodada 0
+    else do
+      return (novosPontosPendentes, novosPontosCadaRodada)
+
