@@ -184,7 +184,7 @@ iniciarLance pinos pontuacao nLance = do
     putStrLn("Lance número 2")
     putStrLn("Aperte enter para jogar a bola!")
     jogada <- getLine
-    pinosParaDerrubar <- getStdRandom $ randomR (9, 9 :: Integer)
+    pinosParaDerrubar <- getStdRandom $ randomR (0, 9 :: Integer)
     resultadoPinos <- (resultadoJogada pinosParaDerrubar pinos)
     let totalPinosDerrubados = (calculaPontuacao pinos resultadoPinos)
     putStrLn("Você acertou "++ (intToString totalPinosDerrubados) ++ " pinos!!")
@@ -195,7 +195,7 @@ iniciarLance pinos pontuacao nLance = do
       putStrLn("Lance número 1")
       putStrLn("Aperte enter para jogar a bola!")
       jogada <- getLine
-      pinosParaDerrubar <- getStdRandom $ randomR (9, 9 :: Integer)
+      pinosParaDerrubar <- getStdRandom $ randomR (0, 9 :: Integer)
       if (pinosParaDerrubar == 9) then do 
         putStrLn("Strike!!!!!!!")
         putStrLn("Você acertou 10 pinos!!")
@@ -290,10 +290,12 @@ iniciarRodadaParaCadaJogador rodada numJogadores nomesJogadores pontuacao pontos
     -- print pontosPendentesDoJogador
     let pontosCadaRodadaDoJogador = pontosCadaRodada!!counter
     -- print pontosCadaRodadaDoJogador
+    let nomeJogador = nomesJogadores!!counter
     let (novaPontuacaoDoJogador, novosPontosPendentesDoJogador) = (calcularNovaPontuacao pontuacaoDoJogador (adicionarPontoPendente pontosPendentesDoJogador pontuacaoLance rodada) 0)
     print novaPontuacaoDoJogador
     print novosPontosPendentesDoJogador
     let novosPontosCadaRodadaDoJogador = (adicionarPontoDaRodada pontosCadaRodadaDoJogador pontuacaoLance rodada)
+    imprimeTabela nomeJogador novosPontosCadaRodadaDoJogador novaPontuacaoDoJogador
     print novosPontosCadaRodadaDoJogador
     let novaPontuacaoJogadores = adicionarPontuacaoJogadores pontuacao novaPontuacaoDoJogador counter
     let novaPontuacaoPendenteJogadores = adicionarPontosPendentesJogadores pontosPendentes novosPontosPendentesDoJogador counter
@@ -306,6 +308,7 @@ iniciarRodada10ParaCadaJogador rodada numJogadores nomesJogadores pontuacao pont
     return (pontuacao, pontosCadaRodada, pontosPendentes)
   else do
     putStrLn("Agora é a vez do "++ (nomesJogadores!!counter))
+    let nomeJogador = nomesJogadores!!counter
     let pontuacaoDoJogador = pontuacao!!counter
     -- print pontuacaoDoJogador
     let pontosPendentesDoJogador = pontosPendentes!!counter
@@ -318,6 +321,7 @@ iniciarRodada10ParaCadaJogador rodada numJogadores nomesJogadores pontuacao pont
     let novaPontuacaoJogadores = adicionarPontuacaoJogadores pontuacao novaPontuacaoDoJogador counter
     let novaPontuacaoPendenteJogadores = adicionarPontosPendentesJogadores pontosPendentes novosPontosPendentesDoJogador counter
     let novaPontuacaoCadaRodadaJogadores = adicionarPontoCadaRodadaJogadores pontosCadaRodada novosPontosCadaRodadaDoJogador counter
+    imprimeTabela nomeJogador novosPontosCadaRodadaDoJogador novaPontuacaoDoJogador
     print novaPontuacaoJogadores
     print novaPontuacaoPendenteJogadores
     print novaPontuacaoCadaRodadaJogadores
@@ -387,6 +391,85 @@ comecarJogoMultiplayer rodada numJogadores nomesJogadores pontuacao pontosCadaRo
 -- imprimir os scores
 -- tratar o numero de jogadores
 -- resultado do jogo
+trocaCaracteres1 :: (Int,Int) -> String
+trocaCaracteres1 pontosCadaRodada =
+  if ((fst pontosCadaRodada) == -1 || (fst pontosCadaRodada) == 10)
+    then " "
+    else show (fst pontosCadaRodada)
+
+trocaCaracteres2 :: (Int,Int) -> String
+trocaCaracteres2 pontosCadaRodada =
+  if ((snd pontosCadaRodada) == -1)
+    then " "
+    else if ((fst pontosCadaRodada) == 10)
+      then "X"
+      else if ((somaPontosLance pontosCadaRodada) == 10)
+        then "/"
+        else show (snd pontosCadaRodada)
+
+trocaCaracteresTotal :: [Int] -> Int -> Int -> (Int, Int) -> String
+trocaCaracteresTotal pontuacaoArray (-1) pontTotal pontosCadaRodada = 
+  if (pontTotal >= 10)
+      then (show pontTotal ++ "  ")
+      else (show pontTotal ++ "   ")
+trocaCaracteresTotal pontuacaoArray pos pontTotal pontosCadaRodada = 
+  if ((pontuacaoArray!!pos == 0) && ((somaPontosLance pontosCadaRodada) /= 0))
+    then " "
+    else (trocaCaracteresTotal pontuacaoArray (pos-1) (pontTotal + (pontuacaoArray!!pos)) (0,0))
+
+trocaCaracteres10 :: (Int,Int) -> String
+trocaCaracteres10 pontosCadaRodada = 
+   if ((fst pontosCadaRodada) == -1)
+    then " "
+    else if ((fst pontosCadaRodada) == 10)
+      then "X"
+      else show (fst pontosCadaRodada)
+
+-- verificaRodada10 :: 
+   
+--fazer trocaCaracteres pro round 10
+
+-- 10,0 - strike
+-- 0,10 - spare
+
+imprimeTabela :: String -> [(Int,Int)] -> [Int] -> IO()
+imprimeTabela nomeJogador pontosCadaRodada pontuacao = do 
+  putStrLn("-----------------------" ++ nomeJogador ++ "-----------------------")
+  putStrLn("------------------------------------------------------------------------------------------------")
+  putStrLn("|   1   |   2   |   3   |   4   |   5   |   6   |   7   |   8   |   9   |     10    |")
+  putStrLn(pos1 ++ pos2 ++ pos3 ++ pos4 ++ pos5 ++ pos6 ++ pos7 ++ pos8 ++ pos9 ++ pos101 ++ pos102 ++ pos103)
+  putStrLn(pont1 ++ pont2 ++ pont3 ++ pont4 ++ pont5 ++ pont6 ++ pont7 ++ pont8 ++ pont9 ++ pont10)
+  putStrLn("------------------------------------------------------------------------------------------------")
+  where
+    pos1 = "| " ++ (trocaCaracteres1(pontosCadaRodada!!0)) ++ " " ++ "| " ++ (trocaCaracteres2(pontosCadaRodada!!0)) ++ " "
+    pos2 = "| " ++ (trocaCaracteres1(pontosCadaRodada!!1)) ++ " " ++ "| " ++ (trocaCaracteres2(pontosCadaRodada!!1)) ++ " "
+    pos3 = "| " ++ (trocaCaracteres1(pontosCadaRodada!!2)) ++ " " ++ "| " ++ (trocaCaracteres2(pontosCadaRodada!!2)) ++ " "
+    pos4 = "| " ++ (trocaCaracteres1(pontosCadaRodada!!3)) ++ " " ++ "| " ++ (trocaCaracteres2(pontosCadaRodada!!3)) ++ " "
+    pos5 = "| " ++ (trocaCaracteres1(pontosCadaRodada!!4)) ++ " " ++ "| " ++ (trocaCaracteres2(pontosCadaRodada!!4)) ++ " "
+    pos6 = "| " ++ (trocaCaracteres1(pontosCadaRodada!!5)) ++ " " ++ "| " ++ (trocaCaracteres2(pontosCadaRodada!!5)) ++ " "
+    pos7 = "| " ++ (trocaCaracteres1(pontosCadaRodada!!6)) ++ " " ++ "| " ++ (trocaCaracteres2(pontosCadaRodada!!6)) ++ " "
+    pos8 = "| " ++ (trocaCaracteres1(pontosCadaRodada!!7)) ++ " " ++ "| " ++ (trocaCaracteres2(pontosCadaRodada!!7)) ++ " "
+    pos9 = "| " ++ (trocaCaracteres1(pontosCadaRodada!!8)) ++ " " ++ "| " ++ (trocaCaracteres2(pontosCadaRodada!!8)) ++ " "
+-- (2,3),(-1,-1),(-1,-1) 
+-- Ou
+-- (5,5),(3,0),(-1,-1) 
+-- Ou 
+-- (10,0),(3,4),(-1,-1)
+-- (10,0),(10,0),(10,0)
+    pos101 = "| " ++ (trocaCaracteres10(pontosCadaRodada!!9)) ++ " " 
+    pos102 = "| " ++ (trocaCaracteres2(pontosCadaRodada!!10)) ++ " "
+    pos103 = "| " ++ (trocaCaracteres10(pontosCadaRodada!!9)) ++ " |"
+    pont1 = "|   " ++ trocaCaracteresTotal pontuacao 0 0 (pontosCadaRodada!!0)
+    pont2 = "|   " ++ trocaCaracteresTotal pontuacao 1 0 (pontosCadaRodada!!1)
+    pont3 = "|   " ++ trocaCaracteresTotal pontuacao 2 0 (pontosCadaRodada!!2)
+    pont4 = "|   " ++ trocaCaracteresTotal pontuacao 3 0 (pontosCadaRodada!!3)
+    pont5 = "|   " ++ trocaCaracteresTotal pontuacao 4 0 (pontosCadaRodada!!4)
+    pont6 = "|   " ++ trocaCaracteresTotal pontuacao 5 0 (pontosCadaRodada!!5)
+    pont7 = "|   " ++ trocaCaracteresTotal pontuacao 6 0 (pontosCadaRodada!!6)
+    pont8 = "|   " ++ trocaCaracteresTotal pontuacao 7 0 (pontosCadaRodada!!7)
+    pont9 = "|   " ++ trocaCaracteresTotal pontuacao 8 0 (pontosCadaRodada!!8)
+    pont10 = "|     " ++ trocaCaracteresTotal pontuacao 9 0  (pontosCadaRodada!!9) ++ "     |"
+
 
 adicionaNomeJogador :: [String] -> String -> [String] 
 adicionaNomeJogador [] nome = [nome]
