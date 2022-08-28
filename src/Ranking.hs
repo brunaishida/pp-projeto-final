@@ -12,7 +12,6 @@ calculaRanking numJogadores nomesJogadores pontuacao = do
   let pontuacaoTotalJogadores = pontuacaoTotal pontuacao
   let tuplaRanking = transformaEmTuplaDeRanking numJogadores nomesJogadores pontuacaoTotalJogadores
   let rankingOrdenado = ordenaPeloPrimeiroDaTupla tuplaRanking
-  -- print rankingOrdenado
   let (pontosPrimeiroColocado, nomePrimeiroColocado) = rankingOrdenado!!0
   putStrLn("E o vencedor foi: " ++ nomePrimeiroColocado ++ " com " ++ (intToString pontosPrimeiroColocado) ++ " pontos!")
   let (pontosSegundoColocado, nomeSegundoColocado) = rankingOrdenado!!1

@@ -34,23 +34,16 @@ iniciarRodadaParaCadaJogador rodada numJogadores nomesJogadores pontuacao pontos
     return (pontuacao, pontosCadaRodada, pontosPendentes)
   else do
     putStrLn(" ")
-    putStrLn("*** Agora é a vez de "++ (nomesJogadores!!counter) ++ " ***")
+    putStrLn("*** Agora eh a vez de "++ (nomesJogadores!!counter) ++ " ***")
     let pontuacaoDoJogador = pontuacao!!counter
-    -- print pontuacaoDoJogador
     let pontosPendentesDoJogador = pontosPendentes!!counter
-    -- print pontosPendentesDoJogador
     let pontosCadaRodadaDoJogador = pontosCadaRodada!!counter
-    -- print pontosCadaRodadaDoJogador
-    -- putStrLn("Pinos derrubados")
     let nomeDoJogador = nomesJogadores!!counter
     if (ehBot nomeDoJogador) then do
       pontuacaoLance <- (iniciarLanceBot iniciarPinos 0 0)
       let (novaPontuacaoDoJogador, novosPontosPendentesDoJogador) = (calcularNovaPontuacao pontuacaoDoJogador (adicionarPontoPendente pontosPendentesDoJogador pontuacaoLance rodada) 0)
-      -- print novaPontuacaoDoJogador
-      -- print novosPontosPendentesDoJogador
       let novosPontosCadaRodadaDoJogador = (adicionarPontoDaRodada pontosCadaRodadaDoJogador pontuacaoLance rodada)
       imprimeTabela nomeDoJogador novosPontosCadaRodadaDoJogador novaPontuacaoDoJogador
-      -- print novosPontosCadaRodadaDoJogador
       let novaPontuacaoJogadores = adicionarPontuacaoJogadores pontuacao novaPontuacaoDoJogador counter
       let novaPontuacaoPendenteJogadores = adicionarPontosPendentesJogadores pontosPendentes novosPontosPendentesDoJogador counter
       let novaPontuacaoCadaRodadaJogadores = adicionarPontoCadaRodadaJogadores pontosCadaRodada novosPontosCadaRodadaDoJogador counter
@@ -58,11 +51,8 @@ iniciarRodadaParaCadaJogador rodada numJogadores nomesJogadores pontuacao pontos
     else do
       pontuacaoLance <- (iniciarLance iniciarPinos 0 0)
       let (novaPontuacaoDoJogador, novosPontosPendentesDoJogador) = (calcularNovaPontuacao pontuacaoDoJogador (adicionarPontoPendente pontosPendentesDoJogador pontuacaoLance rodada) 0)
-      -- print novaPontuacaoDoJogador
-      -- print novosPontosPendentesDoJogador
       let novosPontosCadaRodadaDoJogador = (adicionarPontoDaRodada pontosCadaRodadaDoJogador pontuacaoLance rodada)
       imprimeTabela nomeDoJogador novosPontosCadaRodadaDoJogador novaPontuacaoDoJogador
-      -- print novosPontosCadaRodadaDoJogador
       let novaPontuacaoJogadores = adicionarPontuacaoJogadores pontuacao novaPontuacaoDoJogador counter
       let novaPontuacaoPendenteJogadores = adicionarPontosPendentesJogadores pontosPendentes novosPontosPendentesDoJogador counter
       let novaPontuacaoCadaRodadaJogadores = adicionarPontoCadaRodadaJogadores pontosCadaRodada novosPontosCadaRodadaDoJogador counter
@@ -74,14 +64,11 @@ iniciarRodada10ParaCadaJogador rodada numJogadores nomesJogadores pontuacao pont
     return (pontuacao, pontosCadaRodada, pontosPendentes)
   else do
     putStrLn(" ")
-    putStrLn("*** Agora é a vez de "++ (nomesJogadores!!counter) ++ " ***")
+    putStrLn("*** Agora eh a vez de "++ (nomesJogadores!!counter) ++ " ***")
     let nomeJogador = nomesJogadores!!counter
     let pontuacaoDoJogador = pontuacao!!counter
-    -- print pontuacaoDoJogador
     let pontosPendentesDoJogador = pontosPendentes!!counter
-    -- print pontosPendentesDoJogador
     let pontosCadaRodadaDoJogador = pontosCadaRodada!!counter
-    -- print pontosCadaRodadaDoJogador
     resultadoPontosPendentes <- casoRodada10 pontosPendentesDoJogador pontosCadaRodadaDoJogador 2
     let (novosPontosPendentesDoJogador1, novosPontosCadaRodadaDoJogador) = resultadoPontosPendentes
     let (novaPontuacaoDoJogador, novosPontosPendentesDoJogador) = (calcularNovaPontuacao pontuacaoDoJogador novosPontosPendentesDoJogador1 0)
@@ -89,7 +76,4 @@ iniciarRodada10ParaCadaJogador rodada numJogadores nomesJogadores pontuacao pont
     let novaPontuacaoPendenteJogadores = adicionarPontosPendentesJogadores pontosPendentes novosPontosPendentesDoJogador counter
     let novaPontuacaoCadaRodadaJogadores = adicionarPontoCadaRodadaJogadores pontosCadaRodada novosPontosCadaRodadaDoJogador counter
     imprimeTabela nomeJogador novosPontosCadaRodadaDoJogador novaPontuacaoDoJogador
-    -- print novaPontuacaoJogadores
-    -- print novaPontuacaoPendenteJogadores
-    -- print novaPontuacaoCadaRodadaJogadores
     iniciarRodada10ParaCadaJogador rodada numJogadores nomesJogadores novaPontuacaoJogadores novaPontuacaoCadaRodadaJogadores novaPontuacaoPendenteJogadores (counter+1)
