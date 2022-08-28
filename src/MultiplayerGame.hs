@@ -9,11 +9,11 @@ import PontosPendentes
 import PontosCadaRodada
 import RodadaUnitaria
 import Bot
+import NovoJogo
 
 comecarJogoMultiplayer :: Integer -> Int -> [String] -> [[Int]] -> [[(Int, Int)]] -> [[(Int, Int)]] -> IO()
 comecarJogoMultiplayer rodada numJogadores nomesJogadores pontuacao pontosCadaRodada pontosPendentes = do
   if (rodada > 9) then do
-    putStrLn("Fim de jogo!")
     putStrLn("Calculando resultados...")
     calculaRanking numJogadores nomesJogadores pontuacao
   else do
