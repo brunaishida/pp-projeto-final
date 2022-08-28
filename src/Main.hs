@@ -3,6 +3,8 @@ import System.Random
 import Data.List
 import Data.Function (on)
 import Data.Ord
+import Data.Char
+import Text.Read
 
 intToString :: Int -> String
 intToString n = show n
@@ -457,15 +459,43 @@ receberNomeJogadores nJogadores nomesJogadores counter= do
   nomeJogador <- getLine
   receberNomeJogadores nJogadores (adicionaNomeJogador nomesJogadores nomeJogador) (counter-1)
 
+puroJust :: Maybe a -> a
+puroJust (Just a) = a
+
+validaNJogadores :: Int -> IO Int
+validaNJogadores count = do
+  if(count==0) then do
+    putStrLn ("Quantas pessoas vão jogar? Contando com você. Digite um número de 2-4.")
+    nJogadores <- getLine
+    let nJogadoresMaybe = (readMaybe nJogadores) :: Maybe Int
+    if (nJogadoresMaybe == Nothing) then do
+        validaNJogadores (count+1)
+    else do
+      let valor = puroJust nJogadoresMaybe
+      if (valor >= 2 && valor <= 4) then do
+        return valor
+      else do
+        validaNJogadores (count+1)
+  else do
+    putStrLn("Número inválido, digite um número de 2-4")
+    nJogadores <- getLine
+    let nJogadoresMaybe = (readMaybe nJogadores) :: Maybe Int
+    if ( nJogadoresMaybe == Nothing) then do
+        validaNJogadores (count+1)
+    else do
+      let valor = puroJust nJogadoresMaybe
+      if (valor >= 2 && valor <= 4) then do
+        return valor
+      else do
+        validaNJogadores (count+1)
+
 main :: IO ()
 main = do
   putStrLn "Boliche Arcade"
   putStrLn "Digite seu nome:"
   nome <- getLine
   putStrLn ("Olá " ++ nome ++ ", vamos começar!")
-  putStrLn ("Quantas pessoas vão jogar? Contando com você. Digite um número de 2-4.")
-  nJogadores <- getLine
-  let nJogadoresInt = (stringToInt nJogadores)
+  nJogadoresInt <- validaNJogadores 0
   nomesJogadores <- receberNomeJogadores nJogadoresInt [nome] nJogadoresInt
   print nomesJogadores
   putStrLn "Iniciando o jogo..."
