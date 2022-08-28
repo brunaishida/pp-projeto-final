@@ -13,16 +13,11 @@ main = do
   putStrLn ("Olá " ++ nome ++ ", vamos começar!")
   nJogadoresInt <- validaNJogadores 0
   nomesJogadores <- receberNomeJogadores nJogadoresInt [nome] nJogadoresInt
-  -- print nomesJogadores -- Verificar se deixa
   putStrLn "Iniciando o jogo..."
   let pontuacao = iniciarPontuacaoMultiplayer nJogadoresInt
   let pontosCadaRodada = iniciarPontosCadaRodadaMultiplayer nJogadoresInt
   let pontosPendentes = iniciarPontosPendentesMultiplayer nJogadoresInt
-  -- print pontuacao
-  -- print pontosCadaRodada
-  -- print pontosPendentes
   comecarJogoMultiplayer 0 nJogadoresInt nomesJogadores pontuacao pontosCadaRodada pontosPendentes
-  -- comecarJogo 0 iniciarPontuacao iniciarPontosCadaRodada iniciarPontosPendentes
 
 -- teste grafico
     -- display 
